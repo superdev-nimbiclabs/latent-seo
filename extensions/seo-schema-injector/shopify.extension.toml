@@ -1,0 +1,15 @@
+api_version = "2024-10"
+
+[[extensions]]
+
+uid = "b47b095b-11f7-c302-e5ef-6e2024016f1c8a91039f"
+
+type = "theme"
+name = "LatentSEO Schema Injector"
+handle = "seo-schema-injector"
+
+[extensions.capabilities]
+embed_block = true
+
+[[extensions.targeting]]
+target = "head"

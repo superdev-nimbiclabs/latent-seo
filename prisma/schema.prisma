@@ -1,0 +1,106 @@
+// Prisma Schema for LatentSEO
+// Database: PostgreSQL for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// SHOPIFY AUTHENTICATION (Required by Template)
+// ===========================================
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+// ===========================================
+// APP-SPECIFIC MODELS
+// ===========================================
+
+// Merchant Profile
+model Shop {
+  id          String   @id @default(uuid())
+  shopDomain  String   @unique
+  isActive    Boolean  @default(true)
+  plan        String   @default("FREE") // FREE, PRO
+
+  // AI Settings
+  aiTone      String   @default("PROFESSIONAL") // PROFESSIONAL, FUN, URGENT, LUXURY
+  autoPublish Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  jobs        Job[]
+  logs        OptimizationLog[]
+}
+
+// Background Job Tracking
+model Job {
+  id             String    @id @default(uuid())
+  shopDomain     String
+  shop           Shop      @relation(fields: [shopDomain], references: [shopDomain])
+
+  type           String    // META_DESCRIPTION, SCHEMA_INJECTION, ALT_TEXT
+  status         String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  errorMessage   String?
+
+  totalItems     Int       @default(0)
+  processedItems Int       @default(0)
+
+  createdAt      DateTime  @default(now())
+  completedAt    DateTime?
+
+  logs           OptimizationLog[]
+
+  @@index([shopDomain])
+  @@index([status])
+}
+
+// Optimization History (for Undo functionality)
+model OptimizationLog {
+  id           String    @id @default(uuid())
+  shopDomain   String
+  shop         Shop      @relation(fields: [shopDomain], references: [shopDomain])
+
+  jobId        String?
+  job          Job?      @relation(fields: [jobId], references: [id])
+
+  productId    String    // Shopify GID
+  productTitle String?   // For display purposes
+  field        String    // e.g., "meta_description"
+
+  oldValue     String?
+  newValue     String?
+
+  isReverted   Boolean   @default(false)
+  revertedAt   DateTime?
+
+  createdAt    DateTime  @default(now())
+
+  @@index([shopDomain])
+  @@index([productId])
+  @@index([jobId])
+}

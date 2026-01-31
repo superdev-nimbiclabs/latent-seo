@@ -1,0 +1,144 @@
+{% comment %}
+  LatentSEO - Automatic JSON-LD Schema Injection
+  Company: Nimbiclabs
+  This block injects Google-compliant structured data into the <head>
+{% endcomment %}
+
+{%- if block.settings.enable_schema -%}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+
+  {%- case request.page_type -%}
+
+    {%- when 'product' -%}
+      "@type": "Product",
+      "name": {{ product.title | json }},
+      "description": {{ product.description | strip_html | truncatewords: 50 | json }},
+      "brand": {
+        "@type": "Brand",
+        "name": {{ product.vendor | json }}
+      },
+      {%- if product.featured_image -%}
+      "image": {{ product.featured_image | image_url: width: 1200 | json }},
+      {%- endif -%}
+      "sku": {{ product.selected_or_first_available_variant.sku | default: product.id | json }},
+      "mpn": {{ product.selected_or_first_available_variant.barcode | default: product.id | json }},
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": {{ cart.currency.iso_code | json }},
+        "price": {{ product.selected_or_first_available_variant.price | divided_by: 100.00 | json }},
+        "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+        "url": "{{ shop.url }}{{ product.url }}",
+        "seller": {
+          "@type": "Organization",
+          "name": {{ shop.name | json }}
+        }
+        {%- if product.compare_at_price > product.price -%}
+        ,"priceValidUntil": "{{ 'now' | date: '%Y' | plus: 1 }}-12-31"
+        {%- endif -%}
+      }
+      {%- if product.metafields.reviews.rating.value != blank -%}
+      ,"aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": {{ product.metafields.reviews.rating.value | json }},
+        "reviewCount": {{ product.metafields.reviews.rating_count.value | default: 1 | json }}
+      }
+      {%- endif -%}
+
+    {%- when 'collection' -%}
+      "@type": "CollectionPage",
+      "name": {{ collection.title | json }},
+      "description": {{ collection.description | strip_html | truncatewords: 50 | json }},
+      "url": "{{ shop.url }}{{ collection.url }}",
+      "numberOfItems": {{ collection.products_count | json }}
+
+    {%- when 'article' -%}
+      "@type": "Article",
+      "headline": {{ article.title | json }},
+      "description": {{ article.excerpt | strip_html | truncatewords: 50 | json }},
+      {%- if article.image -%}
+      "image": {{ article.image | image_url: width: 1200 | json }},
+      {%- endif -%}
+      "datePublished": {{ article.published_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+      "dateModified": {{ article.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+      "author": {
+        "@type": "Person",
+        "name": {{ article.author | json }}
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": {{ shop.name | json }},
+        "logo": {
+          "@type": "ImageObject",
+          "url": "{{ 'logo.png' | asset_url | prepend: 'https:' }}"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ shop.url }}{{ article.url }}"
+      }
+
+    {%- when 'blog' -%}
+      "@type": "Blog",
+      "name": {{ blog.title | json }},
+      "description": {{ blog.title | append: ' - ' | append: shop.name | json }},
+      "url": "{{ shop.url }}{{ blog.url }}"
+
+    {%- when 'index' -%}
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }},
+      "logo": "{{ 'logo.png' | asset_url | prepend: 'https:' }}",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": {{ shop.email | json }}
+      },
+      "sameAs": [
+        {{ shop.metafields.social.facebook.value | default: "" | json }},
+        {{ shop.metafields.social.twitter.value | default: "" | json }},
+        {{ shop.metafields.social.instagram.value | default: "" | json }}
+      ]
+
+    {%- when 'page' -%}
+      "@type": "WebPage",
+      "name": {{ page.title | json }},
+      "description": {{ page.content | strip_html | truncatewords: 50 | json }},
+      "url": "{{ shop.url }}{{ page.url }}"
+
+    {%- else -%}
+      "@type": "WebSite",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }}
+
+  {%- endcase -%}
+}
+</script>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "LatentSEO Schema",
+  "target": "head",
+  "settings": [
+    {
+      "type": "header",
+      "content": "LatentSEO - Automatic Schema"
+    },
+    {
+      "type": "paragraph",
+      "content": "This block automatically injects Google-compliant JSON-LD structured data into your store."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_schema",
+      "label": "Enable Auto-Schema",
+      "default": true,
+      "info": "Toggle schema injection on/off"
+    }
+  ]
+}
+{% endschema %}
