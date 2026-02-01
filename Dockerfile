@@ -26,6 +26,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/app/workers ./app/workers
 COPY --from=builder /app/app/services ./app/services
 COPY --from=builder /app/app/lib ./app/lib
+COPY --from=builder /app/app/config ./app/config
 COPY --from=builder /app/app/db.server.ts ./app/db.server.ts
 
 # Generate Prisma client
