@@ -6,10 +6,10 @@ import {
   generateMetaTitle,
   generateAltTextWithVision,
   generateAltTextFallback,
-} from "../services/gemini.server";
-import { shopifyGraphQLWithRetry } from "../services/shopify-api.server";
-import { incrementUsage, canOptimize } from "../services/billing.server";
-import { initSentry, captureError, setUserContext, addBreadcrumb } from "../lib/sentry.server";
+} from "../services/gemini.server.js";
+import { shopifyGraphQLWithRetry } from "../services/shopify-api.server.js";
+import { incrementUsage, canOptimize } from "../services/billing.server.js";
+import { initSentry, captureError, setUserContext, addBreadcrumb } from "../lib/sentry.server.js";
 
 // Initialize Sentry for worker process
 initSentry();
