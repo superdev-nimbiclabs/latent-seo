@@ -1,5 +1,5 @@
-import { prisma } from "../db.server.js";
-import { PLANS, type PlanId, getProductLimit } from "../config/plans.js";
+import { prisma } from "../db.server.ts";
+import { PLANS, type PlanId, getProductLimit } from "../config/plans.ts";
 
 /**
  * Shopify Billing API integration for LatentSEO
