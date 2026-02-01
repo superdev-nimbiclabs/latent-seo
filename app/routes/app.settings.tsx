@@ -473,7 +473,7 @@ export default function SettingsPage() {
                 <Text as="p" variant="bodyMd" tone="subdued">
                   {plan === "PRO"
                     ? "Unlimited optimizations with priority processing."
-                    : "Up to 50 products per month. Upgrade for unlimited access."}
+                    : "Up to 25 products per month. Upgrade for unlimited access."}
                 </Text>
               </BlockStack>
             </Box>
