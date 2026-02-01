@@ -23,7 +23,8 @@ import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { CheckCircleIcon } from "@shopify/polaris-icons";
 import { useState } from "react";
 import { authenticate } from "../shopify.server";
-import { auditProducts, getScoreLabel, type SeoAuditResult } from "../services/seo-audit.server";
+import { auditProducts } from "../services/seo-audit.server";
+import { getScoreLabel, type SeoAuditResult } from "../services/seo-audit.shared";
 import { addSeoFixJob } from "../lib/queue.server";
 
 // GraphQL query to fetch products with SEO data

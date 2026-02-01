@@ -3,28 +3,15 @@
  * Analyzes products for SEO issues and calculates health scores
  */
 
-export interface SeoIssue {
-  field: "metaTitle" | "metaDescription" | "altText" | "productDescription";
-  severity: "critical" | "warning" | "info";
-  message: string;
-  currentValue?: string;
-  recommendation?: string;
-}
+// Import and re-export shared types and utilities
+import {
+  type SeoIssue,
+  type SeoAuditResult,
+  type StoreAuditStats,
+  getScoreLabel,
+} from "./seo-audit.shared";
 
-export interface SeoAuditResult {
-  productId: string;
-  productTitle: string;
-  score: number; // 0-100
-  issues: SeoIssue[];
-}
-
-export interface StoreAuditStats {
-  totalProducts: number;
-  avgScore: number;
-  criticalCount: number;
-  warningCount: number;
-  optimizedCount: number; // Score >= 80
-}
+export { type SeoIssue, type SeoAuditResult, type StoreAuditStats, getScoreLabel };
 
 interface ProductForAudit {
   id: string;
@@ -226,18 +213,3 @@ export function auditProducts(products: ProductForAudit[]): {
   };
 }
 
-/**
- * Get a text summary of the audit score
- */
-export function getScoreLabel(score: number): {
-  label: string;
-  tone: "critical" | "warning" | "success";
-} {
-  if (score >= 80) {
-    return { label: "Good", tone: "success" };
-  } else if (score >= 50) {
-    return { label: "Needs Work", tone: "warning" };
-  } else {
-    return { label: "Critical", tone: "critical" };
-  }
-}
