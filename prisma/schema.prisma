@@ -43,18 +43,87 @@ model Shop {
   id          String   @id @default(uuid())
   shopDomain  String   @unique
   isActive    Boolean  @default(true)
-  plan        String   @default("FREE") // FREE, PRO
+  plan        String   @default("FREE") // FREE, PRO, ENTERPRISE
 
   // AI Settings
   aiTone      String   @default("PROFESSIONAL") // PROFESSIONAL, FUN, URGENT, LUXURY
   autoPublish Boolean  @default(true)
 
+  // Custom AI Prompt Overrides (Phase 2)
+  customMetaTitlePrompt       String?
+  customMetaDescriptionPrompt String?
+  customAltTextPrompt         String?
+
+  // Notification Preferences (Phase 6)
+  notifyOnJobComplete Boolean  @default(true)
+  notificationEmail   String?  // Override email for notifications
+
+  // Custom API Key (Phase 6) - encrypted in production
+  customGeminiApiKey  String?
+
+  // Exclusion Rules (Phase 6)
+  excludedTags        String[] @default([])  // Product tags to skip
+  excludedCollections String[] @default([])  // Collection handles to skip
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relationships
-  jobs        Job[]
-  logs        OptimizationLog[]
+  jobs         Job[]
+  logs         OptimizationLog[]
+  subscription Subscription?
+  usageRecords UsageRecord[]
+}
+
+// Shopify Subscription Tracking
+model Subscription {
+  id                    String    @id @default(uuid())
+  shopDomain            String    @unique
+  shop                  Shop      @relation(fields: [shopDomain], references: [shopDomain])
+
+  // Shopify subscription details
+  shopifySubscriptionId String?   @unique // From AppSubscription.id
+  shopifyChargeId       String?   // From AppSubscriptionLineItem.id
+  status                String    @default("PENDING") // PENDING, ACTIVE, CANCELLED, EXPIRED, FROZEN
+  plan                  String    @default("FREE") // FREE, PRO, ENTERPRISE
+
+  // Billing cycle
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  trialEndsAt           DateTime?
+
+  // Cancellation
+  cancelledAt           DateTime?
+  cancellationReason    String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([status])
+}
+
+// Monthly Usage Tracking
+model UsageRecord {
+  id              String   @id @default(uuid())
+  shopDomain      String
+  shop            Shop     @relation(fields: [shopDomain], references: [shopDomain])
+
+  // Billing period (YYYY-MM format)
+  billingPeriod   String   // e.g., "2025-01"
+
+  // Usage counts
+  productsOptimized Int    @default(0)
+  metaTitlesGenerated Int  @default(0)
+  metaDescriptionsGenerated Int @default(0)
+  altTextsGenerated Int    @default(0)
+  schemasGenerated  Int    @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([shopDomain, billingPeriod])
+  @@index([shopDomain])
+  @@index([billingPeriod])
 }
 
 // Background Job Tracking

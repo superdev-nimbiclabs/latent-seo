@@ -22,12 +22,45 @@ export async function updateShopSettings(
   settings: {
     aiTone?: string;
     autoPublish?: boolean;
+    customMetaTitlePrompt?: string | null;
+    customMetaDescriptionPrompt?: string | null;
+    customAltTextPrompt?: string | null;
+    // Phase 6: Notification preferences
+    notifyOnJobComplete?: boolean;
+    notificationEmail?: string | null;
+    // Phase 6: Custom API key
+    customGeminiApiKey?: string | null;
+    // Phase 6: Exclusion rules
+    excludedTags?: string[];
+    excludedCollections?: string[];
   }
 ) {
   return prisma.shop.update({
     where: { shopDomain },
     data: settings,
   });
+}
+
+export async function getShopExclusionRules(shopDomain: string) {
+  const shop = await prisma.shop.findUnique({
+    where: { shopDomain },
+    select: {
+      excludedTags: true,
+      excludedCollections: true,
+    },
+  });
+  return {
+    excludedTags: shop?.excludedTags || [],
+    excludedCollections: shop?.excludedCollections || [],
+  };
+}
+
+export async function getShopApiKey(shopDomain: string) {
+  const shop = await prisma.shop.findUnique({
+    where: { shopDomain },
+    select: { customGeminiApiKey: true },
+  });
+  return shop?.customGeminiApiKey || null;
 }
 
 export async function getShopStats(shopDomain: string) {

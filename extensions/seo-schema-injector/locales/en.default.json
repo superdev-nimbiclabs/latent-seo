@@ -1,0 +1,30 @@
+{
+  "name": "LatentSEO Schema",
+  "description": "Automatically inject Google-compliant JSON-LD structured data for better SEO and rich results in search.",
+  "settings": {
+    "enable_schema": {
+      "label": "Enable Schema Injection"
+    },
+    "enable_product_schema": {
+      "label": "Product Schema"
+    },
+    "enable_collection_schema": {
+      "label": "Collection Schema"
+    },
+    "enable_article_schema": {
+      "label": "Article Schema"
+    },
+    "enable_blog_schema": {
+      "label": "Blog Schema"
+    },
+    "enable_organization_schema": {
+      "label": "Organization Schema"
+    },
+    "enable_breadcrumbs": {
+      "label": "Breadcrumb Schema"
+    },
+    "enable_faq_schema": {
+      "label": "FAQ Schema"
+    }
+  }
+}

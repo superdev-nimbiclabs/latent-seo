@@ -7,6 +7,10 @@ import {
 } from "@remix-run/node";
 import { isbot } from "isbot";
 import { addDocumentResponseHeaders } from "./shopify.server";
+import { initSentry, Sentry } from "./lib/sentry.server";
+
+// Initialize Sentry on server startup
+initSentry();
 
 export const streamTimeout = 5000;
 
@@ -48,6 +52,10 @@ export default async function handleRequest(
         onError(error) {
           responseStatusCode = 500;
           console.error(error);
+          // Capture error in Sentry
+          if (error instanceof Error) {
+            Sentry.captureException(error);
+          }
         },
       }
     );
@@ -56,4 +64,27 @@ export default async function handleRequest(
     // React has enough time to flush down the rejected boundary contents
     setTimeout(abort, streamTimeout + 1000);
   });
+}
+
+/**
+ * Handle errors for Sentry reporting
+ */
+export function handleError(
+  error: unknown,
+  { request }: { request: Request }
+) {
+  // Don't capture aborted requests
+  if (request.signal.aborted) {
+    return;
+  }
+
+  if (error instanceof Error) {
+    console.error("[Server Error]", error.message);
+    Sentry.captureException(error, {
+      extra: {
+        url: request.url,
+        method: request.method,
+      },
+    });
+  }
 }
